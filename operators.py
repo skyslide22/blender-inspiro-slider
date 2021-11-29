@@ -66,29 +66,33 @@ def setImage(ctx, go_right=False, first=False) -> None:
         active_image_index = 0
 
     for area in ctx.screen.areas:
-        if area.type == 'IMAGE_EDITOR':
-            
-            try:
-                img = loaded_images[active_image_index]
-            
-            except IndexError:
-                reloadImages()
-                if len(loaded_images) > 0:
-                    img = loaded_images[0]
-                else:
-                    img = None
-
-            if img is not None:
-                try:
-                    print(f"set image {active_image_index} - {img.name}")
-                    area.spaces.active.image = img
-                    bpy.ops.image.view_all(fit_view=True)
-                    # TODO: image not zoomed on first folder load
-                    # TODO: & line above does not work for some reason ...
+        for space in area.spaces:
+            if space.type == 'IMAGE_EDITOR':
                 
-                except ReferenceError:
-                    print("reference error, reload images ...")
-                    reloadImages(ctx=ctx)
+                if space.use_image_pin is True:
+                    continue # keep pinned image, eg: two editors, one has pinned img
+
+                try:
+                    img = loaded_images[active_image_index]
+                
+                except IndexError:
+                    reloadImages()
+                    if len(loaded_images) > 0:
+                        img = loaded_images[0]
+                    else:
+                        img = None
+
+                if img is not None:
+                    try:
+                        print(f"set image {active_image_index} - {img.name}")
+                        space.image = img
+                        bpy.ops.image.view_all(fit_view=True)    
+                        # TODO: image not zoomed on first folder load
+                        # TODO: & line above does not work for some reason ...
+                    
+                    except ReferenceError:
+                        print("reference error, reload images ...")
+                        reloadImages(ctx=ctx)
 
 
 
